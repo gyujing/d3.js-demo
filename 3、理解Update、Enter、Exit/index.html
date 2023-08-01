@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <head>
+    <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <title>理解Update、Enter、Exit</title>
+</head>
+
+<body>
+  <p>dog</p>
+  <p>cat</p>
+  <p>pig</p>
+
+  <script>
+    var dataset = [3, 6, 9, 12, 15];
+    var dataset = [3];//, 6, 9, 12, 15
+    var p = d3.select("body")
+      .selectAll("p");
+    var update = p.data(dataset)//绑定数据,并得到update部分
+    var enter = update.enter();//得到enter部分（数组的最后两个元素没有可以绑定的元素）
+    var exit = update.exit();//得到exit部分（最后两个<p>没有可绑定的数据）
+    //下面检验是否真的得到
+    //对于update的处理
+    update.text(function (d, i) {
+      return "update: " + d + ",index: " + i;
+    })
+    //对于enter的处理
+    //注意，这里需要先添加足够多的<p>，然后在添加文本
+    var pEnter = enter.append("p")//添加足够多的<p>
+    pEnter.text(function (d, i) {
+      return "enter: " + d + ",index: " + i;
+    })
+
+    //对于exit的处理通常是删除 ，但在这里我并没有这么做   	
+    // exit.text(function (d, i) {
+    //   return "exit";
+    // })
+    // exit.remove();
+  </script>
+</body>
+
+</html>

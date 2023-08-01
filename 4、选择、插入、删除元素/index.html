@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <head>
+    <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <title>选择、插入、删除元素</title>
+</head>
+
+<body>
+
+  <p>dog</p>
+  <p class="myP2">cat</p>
+  <p id="myP3">pig</p>
+  <p>rat</p>
+
+  <script>
+    // var p = d3.select("body")
+    //   .select("p");
+    // var p = d3.select("body")
+    //   .selectAll(".myP2");
+    // p.style("color", "red");
+
+
+    // 选择任意元素
+    // var dataset = [3, 6, 9, 12];
+    // var p = d3.select("body")
+    //   .selectAll("p")
+    //   .data(dataset)
+    //   .text(function (d, i) {
+    //     if (i == 3) {
+    //       d3.select(this).style("color", "red");
+    //     }
+    //     return d;
+    //   })
+
+    // 插入元素
+    // var p = d3.select("body")
+    //   .append("p")
+    //   .text("another animal")
+    //   .style("color", "red");
+
+    // var p = d3.select("body")
+    //   .insert("p", "#myP3")  //在属性id为myP3的元素前面插入一个新的元素<p>
+    //   .text("insert an animal")
+    //   .style("color", "red");
+
+
+      // 删除元素
+      var p = d3.select("body")
+    		.select("#myP3")
+    		.remove();
+  </script>
+</body>
+
+</html>
