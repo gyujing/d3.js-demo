@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>让图表动起来</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+  <svg width="960" height="600" style="border:1px solid grey"></svg>
+  <script>
+    var marge = { top: 50, bottom: 50, left: 50, right: 50 }
+    var svg = d3.select("svg");//得到SVG画布
+    var width = svg.attr("width");//得到画布的宽
+    var height = svg.attr("height");//得到画布的长
+    var grid = svg.append("g")
+      .attr("transform", "translate(" + marge.left + "," + marge.top + ")");
+
+    var dataset = [10, 20, 30, 23, 13, 40, 27, 35, 20];
+
+
+    // 坐标轴
+    var xScale = d3.scaleBand() // 【域，范围】
+      .domain(d3.range(dataset.length))  //指定了属性域
+      .rangeRound([0, width - marge.left - marge.right]); //等分rangeRound域
+    var xAxis = d3.axisBottom(xScale);
+
+    var yScale = d3.scaleLinear()
+      .domain([0, d3.max(dataset)]) // 指定了属性域
+      .range([height - marge.top - marge.bottom, 0]); //指定了范围
+    var yAxis = d3.axisLeft(yScale);
+
+    grid.append("g") // 移动 x:0,y:height - marge.top - marge.bottom
+      .attr("transform", "translate(0," + (height - marge.top - marge.bottom) + ")")
+      .call(xAxis);
+    grid.append("g")
+      .attr("transform", "translate(0,0)") //父g已经移动，
+      .call(yAxis);
+
+    //绘制矩形和文字
+    var gBar = grid.selectAll("rect")
+      .data(dataset)
+      .enter()
+      .append("g");
+
+    //绘制矩形
+    var rectPadding = 20;//矩形之间的间隙
+    gBar.append("rect")
+      .attr("x", function (d, i) { //柱子左侧边界位置
+        return xScale(i) + rectPadding / 2; //相邻柱子分别占一半
+      })
+      .attr("y", function (d) {
+        var min = yScale.domain()[0];
+    		return yScale(min);//可以得知，这里返回的是最大值
+      })
+      .attr("width", function () {
+        return xScale.step() - rectPadding; //.step():返回相邻波段起点之间的距离
+      })
+      .attr("height", function (d) {
+        return 0;
+      })
+      .attr("fill", "blue")
+      .transition()//添加过渡
+      .duration(2000)//持续时间
+      .delay(function(d,i){//延迟，每个柱子向后延迟，没有delay，所有柱子一起动
+        return i*400;
+      })
+      .ease(d3.easeElasticInOut)//会有弹跳的效果
+      .attr("y",function(d){//回到最终状态
+        return yScale(d);
+      })
+      .attr("height",function(d){//回到最终状态
+        return height-marge.top-marge.bottom-yScale(d);
+      });
+
+    //绘制文字
+    gBar.append("text")
+      .attr("x", function (d, i) {
+        return xScale(i) + rectPadding / 2;
+      })
+      .attr("y", function (d) {
+        var min = yScale.domain()[0];
+    		return yScale(min);//可以得知，这里返回的是最大值
+      })
+      .attr("dx", function () { //从x的位置开始偏移
+        return (xScale.step() - rectPadding) / 2 - 10;  //半个width，居中显示
+      })
+      .attr("dy", -5)  //从y的位置开始偏移
+      .text(function (d) {
+        return d;
+      })
+      .transition()//添加过渡
+      .duration(2000)//持续时间
+      .delay(function(d,i){//延迟，每个柱子向后延迟，没有delay，所有柱子一起动
+        return i*400;
+      })
+      .ease(d3.easeElasticInOut)//会有弹跳的效果
+      .attr("y",function(d){//回到最终状态
+        return yScale(d);
+      })
+
+  </script>
+</body>
+</html>

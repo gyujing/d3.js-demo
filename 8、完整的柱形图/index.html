@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>testD3_chp9_1.html</title>
+
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js">
+  </script>
+
+  <meta name="keywords" content="keyword1,keyword2,keyword3">
+  <meta name="description" content="this is my page">
+  <meta name="content-type" content="text/html; charset=UTF-8">
+
+  <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+</head>
+
+<body>
+  <svg width="960" height="600" style="border:1px solid grey"></svg>
+  <script>
+    var marge = { top: 50, bottom: 50, left: 50, right: 50 }
+    var svg = d3.select("svg");//得到SVG画布
+    var width = svg.attr("width");//得到画布的宽
+    var height = svg.attr("height");//得到画布的长
+    var grid = svg.append("g")
+      .attr("transform", "translate(" + marge.left + "," + marge.top + ")");
+
+    var dataset = [10, 20, 30, 23, 13, 40, 27, 35, 20];
+
+
+    // 坐标轴
+    var xScale = d3.scaleBand() // 【域，范围】
+      .domain(d3.range(dataset.length))  //指定了属性域
+      .rangeRound([0, width - marge.left - marge.right]); //等分rangeRound域
+    var xAxis = d3.axisBottom(xScale);
+
+    var yScale = d3.scaleLinear()
+      .domain([0, d3.max(dataset)]) // 指定了属性域
+      .range([height - marge.top - marge.bottom, 0]); //指定了范围
+    var yAxis = d3.axisLeft(yScale);
+
+    grid.append("g") // 移动 x:0,y:height - marge.top - marge.bottom
+      .attr("transform", "translate(0," + (height - marge.top - marge.bottom) + ")")
+      .call(xAxis);
+    grid.append("g")
+      .attr("transform", "translate(0,0)") //父g已经移动，
+      .call(yAxis);
+
+    //绘制矩形和文字
+    var gBar = grid.selectAll("rect")
+      .data(dataset)
+      .enter()
+      .append("g");
+
+    //绘制矩形
+    var rectPadding = 20;//矩形之间的间隙
+    gBar.append("rect")
+      .attr("x", function (d, i) { //柱子左侧边界位置
+        console.log("xScale(i):",i,xScale(i))
+        return xScale(i) + rectPadding / 2; //相邻柱子分别占一半
+      })
+      .attr("y", function (d) {
+        console.log("yScale(d):",d,yScale(d)) // 从g顶部往下到柱子顶部的距离
+        return yScale(d);
+      })
+      .attr("width", function () {
+        console.log("xScale.step():",xScale.step())
+        return xScale.step() - rectPadding; //.step():返回相邻波段起点之间的距离
+      })
+      .attr("height", function (d) {
+        return height - marge.top - marge.bottom - yScale(d);
+      })
+      .attr("fill", "blue");
+    //绘制文字
+    gBar.append("text")
+      .attr("x", function (d, i) {
+        return xScale(i) + rectPadding / 2;
+      })
+      .attr("y", function (d) {
+        return yScale(d);
+      })
+      .attr("dx", function () { //从x的位置开始偏移
+        return (xScale.step() - rectPadding) / 2 - 10;  //半个width，居中显示
+      })
+      .attr("dy", -5)  //从y的位置开始偏移
+      .text(function (d) {
+        return d;
+      })
+  </script>
+</body>
+
+</html>

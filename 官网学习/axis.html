@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js">  </script>
+</head>
+
+<body>
+  <svg class="svg1"></svg>
+  <script>
+    // ====================axisBottom===================
+    // const width = 640;
+    // const height = 100;
+    // const marginTop = 20;
+    // const marginRight = 20;
+    // const marginBottom = 30;
+    // const marginLeft = 40;
+
+    // var svg = d3.select(".svg1")
+    //   .attr("width", width)
+    //   .attr("height", height);;
+
+    // const x = d3.scaleLinear()
+    //   .domain([0,100])
+    //   .range([marginLeft, width - marginRight]);
+
+    // const gx = svg.append("g")
+    //   .attr("transform", `translate(0,${height - marginBottom})`)
+    //   .call(d3.axisBottom(x).tickValues([1, 20, 30, 50, 80,100]));//指定坐标轴刻度
+
+    // ===================axisLeft====================
+    // const width = 100;
+    // const height = 400;
+    // const marginTop = 20;
+    // const marginRight = 20;
+    // const marginBottom = 30;
+    // const marginLeft = 40;
+
+    // var svg = d3.select(".svg1")
+    //   .attr("width", width)
+    //   .attr("height", height);;
+
+    // const y = d3.scaleLinear()
+    //   .domain([0,100])//从下到上
+    //   .range([height - marginBottom,0]);
+
+    // const gx = svg.append("g")
+    //   .attr("transform", `translate(${marginLeft},${marginTop})`)
+    //   .call(d3.axisLeft(y));
+
+    // =======================axisRight=====================
+    // const width = 100;
+    // const height = 400;
+    // const marginTop = 20;
+    // const marginRight = 20;
+    // const marginBottom = 30;
+    // const marginLeft = 40;
+
+    // var svg = d3.select(".svg1")
+    //   .attr("width", width)
+    //   .attr("height", height);;
+
+    // const y = d3.scaleLinear()
+    //   .domain([0,100])//从下到上
+    //   .range([height - marginBottom,0]);
+
+    // const gx = svg.append("g")
+    //   .attr("transform", `translate(${width - marginLeft},${marginTop})`)
+    //   .call(d3.axisRight(y));
+
+
+    // =================axisBottom  、 scaleBand等分
+    // const width = 400;
+    // const height = 100;
+    // const marginTop = 20;
+    // const marginRight = 20;
+    // const marginBottom = 30;
+    // const marginLeft = 40;
+    // var dataset = [10, 20, 30, 23, 13, 40, 27, 35, 20];
+
+    // var svg = d3.select(".svg1")
+    //   .attr("width", width)
+    //   .attr("height", height);;
+
+    // const x = d3.scaleBand()
+    //   .domain(d3.range(dataset.length))
+    //   .range([0, width - marginLeft -marginRight]);
+
+    // const gx = svg.append("g")
+    //   .attr("transform", `translate(0,${height - marginBottom})`)
+    //   .call(d3.axisBottom(x));//指定坐标轴刻度
+
+
+
+    // ================scaleUtc、scaleTime
+    // const width = 640;
+    // const height = 400;
+    // const marginTop = 20;
+    // const marginRight = 20;
+    // const marginBottom = 30;
+    // const marginLeft = 40;
+
+
+    // const x = d3.scaleUtc()
+    //   .domain([new Date("2023-01-01"), new Date("2024-01-01")])
+    //   .range([marginLeft, width - marginRight]);
+
+    
+    // var scaleTime = d3.scaleTime()
+    //   .domain([new Date(2017, 0, 1, 0), new Date(2017, 0, 1, 2)])
+    //   .range([0, 300]);
+
+    // //定义一个线性比例尺
+    // var svg = d3.select(".svg1")
+    //   .attr("width", width)
+    //   .attr("height", height);
+
+
+    // svg.append("g")
+    //   .attr("transform", `translate(0,${height - marginBottom})`)
+    //   .call(d3.axisBottom(x));
+
+
+
+    // ================scaleQuantize
+    const width = 640;
+    const height = 400;
+    const marginTop = 20;
+    const marginRight = 20;
+    const marginBottom = 30;
+    const marginLeft = 40;
+
+
+    const x = d3.scaleQuantize()
+      .domain([10, 100])
+      .range([1, 2, 4]);
+
+      console.log(x(20))
+      console.log(x(50))
+      console.log(x(90))
+
+  </script>
+</body>
+
+</html>
