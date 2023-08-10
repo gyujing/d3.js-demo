@@ -19,22 +19,22 @@
     var g = svg.append("g")
       .attr("transform", "translate(" + marge.top + "," + marge.left + ")");
 
-    //准备数据
+    //准备数据，点
     var nodes = [//节点集
-      { name: "湖南邵阳" },
-      { name: "山东莱州" },
-      { name: "广东阳江" },
-      { name: "山东枣庄" },
-      { name: "泽" },
-      { name: "恒" },
-      { name: "鑫" },
-      { name: "明山" },
-      { name: "班长" }
+      { name: "湖南邵阳" }, //index: 0
+      { name: "山东莱州" }, //index: 1
+      { name: "广东阳江" }, //index: 2 
+      { name: "山东枣庄" }, //index: 3
+      { name: "泽" }, //index: 4
+      { name: "恒" }, //index: 5
+      { name: "鑫" }, //index: 6
+      { name: "明山" }, //index: 7
+      { name: "班长" } //index: 8
     ];
-
-    var edges = [//边集
-      { source: 0, target: 4, relation: "籍贯", value: 1.3 },
-      { source: 4, target: 5, relation: "舍友", value: 1 },
+    //边集，用于描述连接两点的线条
+    var edges = [
+      { source: 0, target: 4, relation: "籍贯", value: 1.3 },//value为线长度
+      { source: 4, target: 5, relation: "舍友", value: 5 },
       { source: 4, target: 6, relation: "舍友", value: 1 },
       { source: 4, target: 7, relation: "舍友", value: 1 },
       { source: 1, target: 6, relation: "籍贯", value: 2 },
@@ -50,15 +50,17 @@
       .domain(d3.range(nodes.length))
       .range(d3.schemeCategory10);
 
+    //新建一个力导向图
+    // force(name, force)，指定名字分配力
     var forceSimulation = d3.forceSimulation()
-      .force("link", d3.forceLink())
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter());
+      .force("link", d3.forceLink()) //链接力
+      .force("charge", d3.forceManyBody())  //斥力，节点相互之间产生排斥
+      .force("center", d3.forceCenter());   //居中力，中心引力，避免节点聚集在一起或分散得太远
 
     //初始化力导向图，也就是传入数据
-    //生成节点数据
+    //生成节点集数据
     forceSimulation.nodes(nodes)
-      .on("tick", ticked);//这个函数很重要，后面给出具体实现和说明
+      .on("tick", ticked);//开始或每次迭代力模拟时，tick事件将被触发
 
     //生成边数据
     forceSimulation.force("link")
@@ -73,8 +75,8 @@
       .y(height / 2);
 
     //在浏览器的控制台输出
-    console.log(nodes);
-    console.log(edges);
+    console.log("nodes:",nodes);
+    console.log("edges:",edges);
 
     //有了节点和边的数据后，我们开始绘制
     //绘制边
@@ -100,11 +102,12 @@
 
     //绘制节点
     //老规矩，先为节点和节点上的文字分组g
-    var gs = g.selectAll(".circleText")
+    var gCircle = g.selectAll(".circleText")
       .data(nodes)
       .enter()
       .append("g")
       .attr("transform", function (d, i) {
+        console.log("绘制节点:", d)
         var cirX = d.x;
         var cirY = d.y;
         return "translate(" + cirX + "," + cirY + ")";
@@ -116,22 +119,24 @@
       );
 
     //绘制节点
-    gs.append("circle")
+    gCircle.append("circle")
       .attr("r", 10)
       .attr("fill", function (d, i) {
         return colorScale(i);
       })
     //文字
-    gs.append("text")
+    gCircle.append("text")
       .attr("x", -10)
       .attr("y", -20)
-      .attr("dy", 10)
+      .attr("dy", 10)  //向下偏移
       .text(function (d) {
         return d.name;
       })
 
 
     // ticked函数的实现
+    // 通过调用力模拟的force方法来更新节点和链接的位置，以模拟节点之间的受力和运动
+    // 更新节点和链接的位置，以实现节点的运动、重绘和布局
     function ticked() {
       links
         .attr("x1", function (d) { return d.source.x; })
@@ -147,7 +152,7 @@
           return (d.source.y + d.target.y) / 2;
         });
 
-      gs.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+      gCircle.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
     }
 
 
