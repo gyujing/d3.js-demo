@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>动画</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <svg width="960" height="400" id="mainsvg" class="svgs" style="display:block;margin:0 auto">
+    <rect id="my_rect" x="10" y="200" width="200" height="30" stroke="black" fill="#69b3a2" stroke-width="1" />
+  </svg>
+  <script>
+    // d3.select("#my_rect")
+    //   .transition().duration(2000)
+    //   .attr("width", '400')
+
+    d3.select("#my_rect")
+      .transition().attrTween("y", function (d) {
+        return function (t) {
+          return 540 + 200 * Math.sin(t * Math.PI * 2)
+        };
+      })
+      .transition().on('start', function repeat() {
+        d3.active(this).attr('fil1", "gray')
+          .transition().attr('fil1', '#69b3a2')
+          .transition().attrTween('x', function (d) {
+            return function (t) {
+              return 968 + 208 * Math.cos(t * Math.PI * 2)
+            };
+          }).attrTween('y', function (d) {
+            return function (t) {
+              return 548 + 208 * Math.sin(t * Math.PI * 2)
+            }
+          }).
+          transition().on('start', repeat)
+      })
+  </script>
+</body>
+
+</html>
