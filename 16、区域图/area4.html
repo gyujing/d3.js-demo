@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区域图stack</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+    <svg width="960" height="600"></svg>
+
+    <script>
+        const containerWidth = 960;
+        const data = [
+            {
+                "date": "2009",
+                "apple": 130,
+                "banana": 40
+            },
+            {
+                "date": "2010",
+                "apple": 137,
+                "banana": 58
+            },
+            {
+                "date": "2011",
+                "apple": 166,
+                "banana": 97
+            },
+            {
+                "date": "2012",
+                "apple": 154,
+                "banana": 117
+            },
+            {
+                "date": "2013",
+                "apple": 179,
+                "banana": 98
+            },
+            {
+                "date": "2014",
+                "apple": 187,
+                "banana": 120
+            },
+            {
+                "date": "2015",
+                "apple": 189,
+                "banana": 84
+            },
+            {
+                "date": "2016",
+                "apple": 210,
+                "banana": 53
+            }
+        ]
+        const margin = { top: 80, right: 80, bottom: 30, left: 60 }
+        const width = containerWidth - margin.left - margin.right
+        const height = 500 - margin.top - margin.bottom
+        const labelPadding = 3
+        let chart = d3
+            .select("svg")
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+        let g = chart
+            .append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')') // 设最外包层在总图上的相对位置
+
+        const KEYS = ["apple", "banana"];
+        const stack = d3.stack().keys(KEYS);
+
+        const stackedData = stack(data);
+        console.log("stackedData", stackedData)
+
+        const color = d3.scaleOrdinal()
+            .domain(KEYS)
+            .range(["red", "blue"]);;
+
+        const xScale = d3.scaleBand()
+            .domain(data.map((d) => d.date))
+            .range([0, width - margin.right - margin.left]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(stackedData, item1 => d3.max(item1, item2 => item2[1]))]) //apple和banana的最大值
+            .range([height - margin.top - margin.bottom, 0]);
+
+
+        g.append('g').attr('transform', `translate(0,${height - margin.top - margin.bottom})`).call(d3.axisBottom(xScale));
+        g.append('g').attr('transform', `translate(0,0)`).call(d3.axisLeft(yScale));
+
+
+        let area = d3.area()
+            .x(d => {
+                console.log("d0", d)
+                return xScale(d.data.date)
+            })
+            .y1(d => yScale((d[1])))
+            .y0(d => yScale((d[0]))) //设置顶线 y
+            .curve(d3.curveCardinal.tension(0.5));
+
+        g.append('g').selectAll('.riverPath')
+            .data(stackedData, d => {
+                console.log("d1", d)
+                return d.key
+            }).join('path')
+            .attr('class', 'riverPath')
+            .attr("d", area)
+            .attr("fill", d => color(d.key));
+
+
+    </script>
+</body>
+
+</html>
