@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3 简单柱状图</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  <script src="../js/d3.tip.js"></script>
+</head>
+<style>
+  .d3-tip {
+    background-color: grey;
+    color: #ffffff;
+    padding: 5px 10px;
+  }
+
+</style>
+
+<body>
+  <svg width="960" height="600" style="background-color: aqua;"></svg>
+</body>
+<script type="module">
+  const svg = d3.select("svg");
+  const width = svg.attr('width');
+  const height = svg.attr('height');
+
+  const margin = { top: 60, right: 80, bottom: 60, left: 100 }
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const data = [
+    { letter: '一', frequency: 0.08167 },
+    { letter: '二', frequency: 0.13492 },
+    { letter: '三', frequency: 0.02782 },
+    { letter: '四', frequency: 0.04253 },
+    { letter: '五', frequency: 0.12702 },
+    { letter: '六', frequency: 0.02288 },
+    { letter: '日', frequency: 0.22288 }
+  ]
+
+  const maingroup = svg.append("g").attr("id", "maingroup")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // console.log(data.map(d => {
+  //   return d.letter
+  // }));
+
+  /** 
+   * 1、x轴 
+   */
+  const xScale = d3
+    .scaleBand()
+    .rangeRound([0, innerWidth])
+    .padding(0.1)
+    .domain(
+      data.map(d => {
+        return d.letter
+      })
+    );
+
+  maingroup.append('g')
+    .attr("id", 'xAxis')
+    .attr('transform', `translate(0,${innerHeight})`) //将x坐标轴从上面移到下面
+    .call(d3.axisBottom(xScale));
+
+  /**
+   * 2、y轴
+   */
+  const yScale = d3
+    .scaleLinear()
+    .domain([
+      0,
+      d3.max(data, d => {
+        return d.frequency
+      })
+    ]) //从下到上
+    .range([innerHeight, 0]);
+
+  maingroup.append('g')
+    .attr("id", 'yAxis')
+    .call(d3.axisLeft(yScale).ticks(10, '%'))
+    .append("text")
+    .attr("y", -16)
+    .attr('dy', '.71em')
+    .attr("text-anchor", 'middle')
+    .attr("fill", "red")
+    .text("空置率 (%)");
+
+
+  /**
+   *  设置背景柱
+   */
+  const colors = ['#ccc', '#ddd'] // 用于生成背景柱
+  const stepArray = d3.ticks(0, d3.max(data, d => d.frequency), 10) // 用于生成背景柱
+  console.log("stepArray", stepArray);
+  console.log(d3.range(stepArray.length - 1));
+  maingroup.append('g') // 设置背景柱
+    .attr('class', 'bar--bg-bar')
+    .selectAll('rect')
+    .data(d3.range(stepArray.length - 1))
+    .enter()
+    .append('rect')
+    .attr('stroke', 'none')
+    .attr('stroke-width', 0)
+    .attr('fill', function (d, i) {
+      return colors[i % 2]
+    })
+    .attr('x', 1)
+    .attr('y', function (d, i) {
+      return yScale((i + 1) * stepArray[1])
+    })
+    .attr('width', innerWidth)
+    .attr('height', function (d, i) {
+      return yScale(stepArray[i]) - yScale(stepArray[i + 1])
+    })
+
+
+  /**
+   * 提示 
+   */
+  let tip = d3.tip() // 设置tip
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function (d) {
+      return (
+        '<strong>星期' +
+        d.letter +
+        "<br>空置率:</strong> <span style='color:#ffeb3b'>" +
+        (d.frequency * 100).toFixed(2) +
+        '%</span>'
+      )
+    })
+
+  maingroup.call(tip)
+
+  /**
+   * 3、柱形图
+   */
+  maingroup
+    .append("g")
+    .attr("class", "bar-group")
+    .selectAll("rect")
+    .data(data)
+    .join("rect")
+    .on('mouseover', tip.show)
+    .on('mouseout', tip.hide)
+    .attr("class", ".bar")
+    .attr("fill", '#8a2be2')
+    .attr("x", d => {
+      return xScale(d.letter);
+    })
+    .attr('y', innerHeight) // 控制动画由下而上
+    .attr("width", xScale.bandwidth())
+    .attr('height', 0) // 控制动画由下而上
+    .transition()
+    .duration(200)
+    .ease(d3.easeBounceInOut)
+    .delay(function (d, i) {
+      return i * 200
+    })
+    .attr("y", d => {
+      // console.log(yScale(d.frequency));
+      return yScale(d.frequency)
+    })
+    .attr("height", d => {
+      return innerHeight - yScale(d.frequency)
+    });
+
+  /**
+   * 柱形图上显示数字
+   */
+  maingroup
+    .append("g")
+    .attr("class", "bar-text")
+    .selectAll("text")
+    .data(data)
+    .join("text")
+    .attr("fill", 'red') // 颜色
+    .attr("x", d => {   // 文本坐标x
+      return xScale(d.letter)
+    })
+    .attr("dx", xScale.bandwidth() / 2 - 30)  //水平偏移
+    .attr("y", d => {   // 文本坐标y 
+      return yScale(d.frequency)
+    })
+    .attr("dy", -5)  //垂直偏移
+    .text(d => {   //文本内容
+      return (d.frequency * 100).toFixed(2) + "%"
+    })
+    .on("mouseover",tip.show)
+    .on("mouseout",tip,hide);
+
+
+  /**
+   *  添加标题
+   */
+  maingroup
+    .append("text")
+    .attr("class", 'chartTitle')
+    .attr("fill", '#000')
+    .attr("x", innerWidth / 2 - 30)
+    .attr("y", -12)
+    .attr('font-size', '16px')
+    .attr('font-weight', '700')
+    .attr("text-anchor", 'middle')
+    .text("本周酒店房间空置率");
+
+
+</script>
+
+</html>

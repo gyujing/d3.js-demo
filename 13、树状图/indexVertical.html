@@ -19,17 +19,17 @@
   <svg width="1200" height="600"></svg>
   <script>
     //定义边界
-    var marge = { top: 50, bottom: 0, left: 10, right: 0 };
+    var marge = { top: 100, bottom: 0, left: 10, right: 0 };
 
     var svg = d3.select("svg");
     var width = svg.attr("width");
     var height = svg.attr("height");
 
     var g = svg.append("g")
-      .attr("transform", "translate(" + marge.top + "," + marge.left + ")");
+      .attr("transform", "translate(" + marge.left + "," + marge.top + ")");
 
     var scale = svg.append("g")
-      .attr("transform", "translate(" + marge.top + "," + marge.left + ")");
+      .attr("transform", "translate(" + marge.left + "," + marge.top + ")");
     //数据
     var dataset = {
       name: "中国",
@@ -88,6 +88,9 @@
       .sum(function (d) {  //所有数据遍历
         return d.value;
       });
+
+      console.log("data",dataset);
+      console.log("hierarchyData",hierarchyData);
 
     //创建一个树状图
     var tree = d3.tree()
@@ -149,16 +152,18 @@
 
     //文字
     gs.append("text")
+      .attr("text-anchor",d=> d.children ? "end" : "start")
       .attr("x", function (d) {
-        return d.children ? 10 : -20;
+        // return -15;
       })
       .attr("y", function (d) {
-        return d.children ? 5 : 27;
+        return d.children ? -15 : 27;
       })
       .text(function (d) {
         return d.data.name;
-      });
-
+      })
+      .attr("writing-mode",'vertical-rl')//横排从上到下
+      .attr("text-orientation",'upright');
   </script>
 </body>
 

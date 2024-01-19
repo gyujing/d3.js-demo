@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3 简单线状图</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+
+</head>
+
+
+<body>
+  <svg width="960" height="600" style="background-color: rgb(232, 234, 234);"></svg>
+</body>
+<script type="module">
+  const svg = d3.select("svg");
+  const width = svg.attr('width');
+  const height = svg.attr('height');
+
+  const margin = { top: 60, right: 80, bottom: 60, left: 100 }
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const data = [
+    { date: '2009', apple: 130, banana: 40 },
+    { date: '2010', apple: 137, banana: 58 },
+    { date: '2011', apple: 166, banana: 97 },
+    { date: '2012', apple: 154, banana: 117 },
+    { date: '2013', apple: 179, banana: 98 },
+    { date: '2014', apple: 187, banana: 120 },
+    { date: '2015', apple: 189, banana: 84 },
+    { date: '2016', apple: 210, banana: 53 }
+  ]
+
+  const maingroup = svg.append("g").attr("id", "maingroup")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+  /** 
+   * 1、x轴 
+   */
+  const xScale = d3
+    .scaleTime()
+    .range([0, innerWidth])
+    .domain([
+      d3.timeParse('%Y')(data[0].date),
+      d3.timeParse('%Y')(data[data.length - 1].date),
+    ]);
+
+
+
+  maingroup.append('g')
+    .attr("id", 'xAxis')
+    .attr('transform', `translate(0,${innerHeight})`) //将x坐标轴从上面移到下面
+    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat('%Y年')));
+
+
+</script>
+
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>排序</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+
+</body>
+<script type="module">
+
+// console.log([39, 21, 1, 104, 22].sort(d3.ascending));
+// console.log([39, 21, 1, 104, 22].sort(d3.descending));
+
+// 通过index重新排序
+// console.log(d3.permute(["a", "b", "c"], [1, 2, 0]) );
+
+const object = {yield: 27, variety: "Manchuria", year: 1931, site: "University Farm"};
+console.log(d3.permute(object, ["site", "variety", "yield"]) );
+
+
+</script>
+
+</html>

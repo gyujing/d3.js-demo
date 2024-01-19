@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>返回最小、最大值</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+
+</body>
+<script type="module">
+
+  console.log(d3.extent([3, 2, 1, 1, 6, 2, 4]));
+
+  const alphabet = [
+    { letter: '一', frequency: 167 },
+    { letter: '二', frequency: 492 },
+    { letter: '三', frequency: 782 },
+    { letter: '四', frequency: 253 },
+    { letter: '五', frequency: 702 },
+    { letter: '六', frequency: 288 },
+    { letter: '日', frequency: 288 }
+  ]
+
+  // console.log(d3.extent(alphabet, (d) => d.frequency))
+  console.log(d3.extent(alphabet, (d) => d.doesnotexist) );
+
+
+
+</script>
+
+</html>
