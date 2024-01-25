@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3 简单线状图</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+
+</head>
+
+
+<body>
+  <svg width="960" height="600" style="background-color: #E8EBEA;"></svg>
+</body>
+<script type="module">
+  const svg = d3.select("svg");
+  const width = svg.attr('width');
+  const height = svg.attr('height');
+
+  const margin = { top: 60, right: 80, bottom: 60, left: 100 }
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const data = [
+    { date: '2009', apple: 130, banana: 40 },
+    { date: '2010', apple: 137, banana: 58 },
+    { date: '2011', apple: 166, banana: 97 },
+    { date: '2012', apple: 154, banana: 117 },
+    { date: '2013', apple: 179, banana: 98 },
+    { date: '2014', apple: 187, banana: 120 },
+    { date: '2015', apple: 189, banana: 84 },
+    { date: '2016', apple: 210, banana: 53 }
+  ]
+
+  const names = { apple: '苹果', banana: '香蕉' }
+
+  const series = d3
+    .map(data[0])
+    .keys()
+    .slice(1)
+    .map(key => {
+      return data.map(d => {
+        return {
+          key: key,
+          date: d3.timeParse("%Y")(d.date),
+          value: d[key]
+        }
+      })
+    });
+  console.log(series);
+
+
+  const maingroup = svg.append("g").attr("id", "maingroup")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+  maingroup
+    .append('defs')
+    .append('clipPath') // 添加长方形方块，遮罩作用
+    .attr('id', 'clip')
+    .append('rect')
+    .attr('height', innerHeight)
+    .attr('width', 0) // 用遮罩实现线动画
+    .transition()
+    .duration(1000)
+    .attr('width', innerWidth)
+
+  /** 
+   * 坐标轴 - x 
+   */
+  // const xScale = d3
+  //   .scaleTime()
+  //   .range([0, innerWidth])
+  //   .domain([
+  //     d3.timeParse('%Y')(data[0].date),
+  //     d3.timeParse('%Y')(data[data.length - 1].date),
+  //   ]);
+
+  const xScale = d3
+    .scaleTime()
+    .range([0, innerWidth])
+    .domain([
+      d3.timeParse('%Y')(data[0].date),
+      d3.timeParse('%Y')(data[data.length - 1].date),
+    ]);
+
+  maingroup.append('g')
+    .attr("id", 'xAxis')
+    .attr('transform', `translate(0,${innerHeight})`) //将x坐标轴从上面移到下面
+    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat('%Y年')));
+
+
+  /**
+   * 坐标轴 - y
+   */
+  const yScale = d3
+    .scaleLinear()
+    .domain([
+      0,
+      d3.max(series, function (s) {
+        // 迭代，先获取每组的最大值
+        return d3.max(s, function (d) {
+          return d.value
+        })
+      })])
+    .range([innerHeight, 0]);
+
+  /**
+   * 双线条
+   */
+  const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+  let line = d3
+    .line()
+    .x(d => {
+      return xScale(d.date)
+    })
+    .y(d => {
+      return yScale(d.value)
+    });
+
+  let serie = maingroup
+    .selectAll(".serie")
+    .data(series)
+    .join("g")
+    .attr("class", "serie");
+
+  serie
+    .append("path")
+    .attr('clip-path', 'url(#clip)')
+    .attr("calss", "line")
+    .attr("fill", 'none')
+    .style('stroke', function (d) {
+      return colorScale(d[0].key)
+    })
+    .attr("d", line);
+
+  /**
+   * 这线上添加数字 
+   */
+  let labelG = serie
+    .selectAll(".label")
+    .data(d => d)
+    .join("g")
+    .attr("class", 'label')
+    .attr('transform', function (d, i) {
+      return 'translate(' + xScale(d.date) + ',' + yScale(d.value) + ')'
+    })
+
+  // 文字背景
+  labelG.append("rect")
+    .attr("x", -35)
+    .attr("y", -20)
+    .attr("width", 60)
+    .attr("height", 30)
+    .attr("fill", "#E8EBEA");
+
+  // 文字
+  labelG.append("text")
+    .attr("dx", -30)
+    .attr("fill", 'black')
+    .text(d => d.value + " 吨")
+    .filter((d, i) => {
+      return i == data.length - 1;
+    })
+    .append("tspan")
+    .attr("class", "serie-key")
+    .attr("fill", 'blue')
+    .attr("font-size", '14px')
+    .text(d => " " + names[d.key])
+
+
+  /**
+   *  标题
+   */
+  maingroup
+    .append("g")
+    .attr("class", "title")
+    .append("text")
+    .attr("x", innerWidth * 0.3)
+    .attr("y", -20)
+    .attr("fill", 'black')
+    .text("最近几年XX本地年产苹果香蕉数量");
+
+
+
+
+
+</script>
+
+</html>
