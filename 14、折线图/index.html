@@ -129,6 +129,7 @@
       .attr('transform', 'translate(0,' + height + ')')
       .call(d3.axisBottom(x).tickFormat(d3.timeFormat('%Y年')))
 
+      console.log(series);
     let serie = g
       .selectAll('.serie') // 生成两线条
       .data(series)
@@ -180,10 +181,12 @@
     label
       .insert('rect', 'text') // 生成背景白块
       .datum(function() {
+        console.log("22",this.nextSibling.getBBox());
         return this.nextSibling.getBBox()
       })
       .attr('fill', '#fff')
       .attr('x', function(d) {
+        console.log("d:",d);
         return d.x - labelPadding
       })
       .attr('y', function(d) {

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  <title>面积图</title>
+</head>
+
+<body>
+  <svg width="1600" height="600" style="background-color: gainsboro;"></svg>
+</body>
+<script>
+  const svg = d3.select("svg");
+  const width = svg.attr("width");
+  const height = svg.attr("height");
+
+  const margin = { left: 60, top: 100, right: 60, bottom: 60 };
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const height2 = innerHeight - 100;
+
+
+  const chart = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  /**\
+   * 动画效果
+   */
+  chart
+    .append('defs')
+    .append('clipPath') // 添加长方形方块，遮罩作用
+    .attr('id', 'clip')
+    .append('rect')
+    .attr('height', height2)
+    .attr('width', 0) // 用遮罩实现线动画
+    .transition()
+    .duration(1000)
+    .attr('width', innerWidth)
+
+  const rawData = [
+    { day: '2015-01', apple: 1240, banana: 444 },
+    { day: '2015-02', apple: 1905, banana: 334 },
+    { day: '2015-03', apple: 6232, banana: 256 },
+    { day: '2015-04', apple: 7545, banana: 1234 },
+    { day: '2015-05', apple: 543, banana: 4567 },
+    { day: '2015-06', apple: 443, banana: 3452 },
+    { day: '2015-07', apple: 246, banana: 2312 },
+    { day: '2015-08', apple: 5445, banana: 222 },
+    { day: '2015-09', apple: 1154, banana: 289 },
+    { day: '2015-10', apple: 448, banana: 655 },
+    { day: '2015-11', apple: 1545, banana: 3457 },
+    { day: '2015-12', apple: 4585, banana: 5683 },
+    { day: '2016-01', apple: 1520, banana: 45 },
+    { day: '2016-02', apple: 9015, banana: 6785 },
+    { day: '2016-03', apple: 632, banana: 33 },
+    { day: '2016-04', apple: 745, banana: 778 },
+    { day: '2016-05', apple: 343, banana: 557 },
+    { day: '2016-06', apple: 6443, banana: 2345 },
+    { day: '2016-07', apple: 546, banana: 3555 },
+    { day: '2016-08', apple: 1545, banana: 5678 },
+    { day: '2016-09', apple: 1354, banana: 3455 },
+    { day: '2016-10', apple: 848, banana: 33 },
+    { day: '2016-11', apple: 2155, banana: 45 },
+    { day: '2016-12', apple: 4585, banana: 557 },
+    { day: '2017-01', apple: 1540, banana: 3322 },
+    { day: '2017-02', apple: 905, banana: 4567 },
+    { day: '2017-03', apple: 632, banana: 77 },
+    { day: '2017-04', apple: 745, banana: 83 },
+    { day: '2017-05', apple: 3543, banana: 333 },
+    { day: '2017-06', apple: 4443, banana: 8901 },
+    { day: '2017-07', apple: 2546, banana: 446 },
+    { day: '2017-08', apple: 545, banana: 235 },
+    { day: '2017-09', apple: 154, banana: 334 },
+    { day: '2017-10', apple: 4848, banana: 112 },
+    { day: '2017-11', apple: 155, banana: 223 },
+    { day: '2017-12', apple: 4585, banana: 4445 }
+  ]
+
+  const data = rawData.map(item => {
+    return { ...item, day: d3.timeParse("%Y-%m")(item.day) }
+  })
+  console.log(data);
+
+  const keys = d3.map(data[0]).keys().slice(1);
+  console.log("keys", keys);
+  const stack = d3.stack().keys(keys);
+  const stackDate = stack(data);
+  console.log("stackDate", stackDate);
+
+  /**
+   * 颜色
+   */
+  const colorScale = d3.scaleOrdinal()
+    .domain(keys)
+    .range(d3.schemeCategory10);
+
+  /**
+   * x轴
+   */
+  const xScale = d3.scaleTime()
+    .domain(
+      d3.extent(data, d => d.day)
+    )
+    .range([0, innerWidth])
+
+  chart.append("g")
+    .attr("class", "axis--x")
+    .attr("transform", "translate(0," + height2 + ")")
+    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y年%m月")))
+
+  /**
+   * y轴
+   */
+
+  //apple和banana的最大值
+  const maxValue = d3.max(stackDate, item1 => d3.max(item1, item2 => item2[1]));
+
+  const yScale = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([height2, 0])
+
+  chart.append("g")
+    .attr("class", "axis--y")
+    .call(d3.axisLeft(yScale))
+    .append("text")
+    .attr("fill", '#000')
+    .attr("text-anchor", 'middle')
+    .attr("dy", '-17')
+    .text("顾客人数 (人)")
+
+
+  /**
+   * 堆叠面积图
+   */
+  const area = d3.area()
+    .x(d => xScale(d.data.day))
+    .y0(d => yScale(d[0]))
+    .y1(d => yScale(d[1]))
+    .curve(d3.curveCardinal.tension(0.5));
+
+
+  chart.append("g")
+    .attr("class", "area")
+    .selectAll(".riverPath")
+    .data(stackDate, d => d.key)
+    .join("path")
+    .attr("class", 'riverPath')
+    .attr("clip-path", 'url(#clip)')
+    .attr("d", area)
+    .attr("fill", d => colorScale(d.key))
+    .attr("stroke", "none")
+
+
+
+  /**
+   * 添加图例
+   */
+  const legend = chart.append("g")
+    .attr("class", 'legend')
+    .attr("transform", "translate(0," + (innerHeight - 40) + ")")
+    .selectAll(".legend-item")
+    .data(keys)
+    .join("g")
+    .attr("class", 'legend-item')
+    .attr("transform", (d, i) => "translate(" + (innerWidth / 2 - 100 * i) + ",0)");
+
+
+  legend.append("rect")
+    .attr("width", '20')
+    .attr("height", '20')
+    .attr("fill", d => colorScale(d))
+    .style("stroke", "none");
+
+  legend.append("text")
+    .attr("x", 30)
+    .attr("y", 15)
+    .attr("fill", d => colorScale(d))
+    .style("stroke", "none")
+    .text(d => d)
+
+  /**
+   * 标题
+   */
+  chart.append("text")
+    .attr("class", "title")
+    .attr("y", -70)
+    .attr("x", innerWidth / 2)
+    .attr("height", "60")
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .style("font-size", "18px")
+    .style("font-weight", "bold")
+    .text("2017年饭店每月接待顾客人数")
+
+
+
+
+</script>
+
+</html>

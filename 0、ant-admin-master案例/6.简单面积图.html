@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  <title>面积图</title>
+</head>
+
+<body>
+  <svg width="1600" height="600" style="background-color: gainsboro;"></svg>
+</body>
+<script>
+  const svg = d3.select("svg");
+  const width = svg.attr("width");
+  const height = svg.attr("height");
+
+  const margin = { left: 60, top: 100, right: 60, bottom: 60 };
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const height2 = innerHeight - 100;
+
+
+  const chart = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  /**\
+   * 动画效果
+   */
+  chart
+    .append('defs')
+    .append('clipPath') // 添加长方形方块，遮罩作用
+    .attr('id', 'clip')
+    .append('rect')
+    .attr('height', height2)
+    .attr('width', 0) // 用遮罩实现线动画
+    .transition()
+    .duration(1000)
+    .attr('width', innerWidth)
+
+  const rawData = [
+    { day: '2015-01', quantity: 1240 },
+    { day: '2015-02', quantity: 1905 },
+    { day: '2015-03', quantity: 6232 },
+    { day: '2015-04', quantity: 7545 },
+    { day: '2015-05', quantity: 543 },
+    { day: '2015-06', quantity: 443 },
+    { day: '2015-07', quantity: 246 },
+    { day: '2015-08', quantity: 5445 },
+    { day: '2015-09', quantity: 1154 },
+    { day: '2015-10', quantity: 448 },
+    { day: '2015-11', quantity: 1545 },
+    { day: '2015-12', quantity: 4585 },
+    { day: '2016-01', quantity: 1520 },
+    { day: '2016-02', quantity: 9015 },
+    { day: '2016-03', quantity: 632 },
+    { day: '2016-04', quantity: 745 },
+    { day: '2016-05', quantity: 343 },
+    { day: '2016-06', quantity: 6443 },
+    { day: '2016-07', quantity: 546 },
+    { day: '2016-08', quantity: 1545 },
+    { day: '2016-09', quantity: 1354 },
+    { day: '2016-10', quantity: 848 },
+    { day: '2016-11', quantity: 2155 },
+    { day: '2016-12', quantity: 4585 },
+    { day: '2017-01', quantity: 1540 },
+    { day: '2017-02', quantity: 905 },
+    { day: '2017-03', quantity: 632 },
+    { day: '2017-04', quantity: 745 },
+    { day: '2017-05', quantity: 3543 },
+    { day: '2017-06', quantity: 4443 },
+    { day: '2017-07', quantity: 2546 },
+    { day: '2017-08', quantity: 545 },
+    { day: '2017-09', quantity: 154 },
+    { day: '2017-10', quantity: 4848 },
+    { day: '2017-11', quantity: 155 },
+    { day: '2017-12', quantity: 4585 }
+  ]
+
+  const data = rawData.map(item => {
+    return { ...item, day: d3.timeParse("%Y-%m")(item.day) }
+  })
+  console.log(data);
+
+  /**
+   * x轴
+   */
+  const xScale = d3.scaleTime()
+    .domain(
+      d3.extent(data, d => d.day)
+    )
+    .range([0, innerWidth])
+
+  chart.append("g")
+    .attr("class", "axis--x")
+    .attr("transform", "translate(0," + height2 + ")")
+    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y年%m月")))
+
+  /**
+   * y轴
+   */
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.quantity)])
+    .range([height2, 0])
+
+  chart.append("g")
+    .attr("class", "axis--y")
+    .call(d3.axisLeft(yScale))
+    .append("text")
+    .attr("fill", '#000')
+    .attr("text-anchor", 'middle')
+    .attr("dy", '-17')
+    .text("顾客人数 (人)")
+
+  /**
+   * 背景分割线 - 横向分割y轴
+   */
+  chart.select(".axis--y")
+    .selectAll(".tick")
+    .append("line")
+    .attr("class", 'bg-line')
+    .attr("x1", innerWidth)
+    .style("stroke", "yellow")
+
+  chart.select('.axis--y .bg-line:last-of-type').remove()
+
+  const area = d3.area()
+    .x(d => xScale(d.day))
+    .y0(d => yScale(0))
+    .y1(d => yScale(d.quantity))
+    .curve(d3.curveCardinal.tension(0.5));
+
+
+  chart.append("g")
+    .attr("class", "area")
+    .datum(data)
+    .append("path")
+    .attr("clip-path", 'url(#clip)')
+    .attr("d", area)
+    .attr("fill", "green")
+    .attr("stroke", "black")
+
+  /**
+   * 添加点
+   */
+  chart.append("g")
+    .attr("class", 'label-circle')
+    .selectAll()
+    .data(data)
+    .join("circle")
+    .attr("cx", d => xScale(d.day))
+    .attr("cy", d => yScale(d.quantity))
+    .attr("r", "5")
+    .attr("fill", "orange")
+    .style("stroke", "none")
+
+  /**
+  * 添加数字
+  */
+  chart.append("g")
+    .attr("class", 'label-text')
+    .selectAll()
+    .data(data)
+    .join("text")
+    .attr("x", d => xScale(d.day) + 10)
+    .attr("y", d => yScale(d.quantity))
+    .attr("width", '100')
+    .attr("text-anchor", "start")
+    .attr("fill", "black")
+    .style("font-size", "12px")
+    .text(d => d.quantity)
+
+  /**
+   * 标题
+   */
+  chart.append("text")
+    .attr("class", "title")
+    .attr("y", -70)
+    .attr("x", innerWidth / 2)
+    .attr("height", "60")
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .style("font-size", "18px")
+    .style("font-weight", "bold")
+    .text("2017年饭店每月接待顾客人数")
+
+
+
+
+</script>
+
+</html>

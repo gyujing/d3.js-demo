@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3 组合柱状图</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+  <script src="../js/d3.tip.js"></script>
+</head>
+<style>
+  .d3-tip {
+    background-color: grey;
+    color: #ffffff;
+    padding: 5px 10px;
+  }
+
+</style>
+
+<body>
+  <svg width="1260" height="600"></svg>
+</body>
+<script type="module">
+  const svg = d3.select("svg");
+  const width = svg.attr('width');
+  const height = svg.attr('height');
+
+  const margin = { top: 60, right: 80, bottom: 60, left: 100 }
+
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const data = [
+    { date: '2011', q1: 155, q2: 200, q3: 214, q4: 234 },
+    { date: '2012', q1: 165, q2: 210, q3: 244, q4: 254 },
+    { date: '2013', q1: 175, q2: 230, q3: 274, q4: 274 },
+    { date: '2014', q1: 185, q2: 250, q3: 304, q4: 294 },
+    { date: '2015', q1: 195, q2: 270, q3: 334, q4: 314 },
+    { date: '2016', q1: 205, q2: 290, q3: 364, q4: null }
+  ]
+
+  const names = {
+    q1: '第一季度',
+    q2: '第二季度',
+    q3: '第三季度',
+    q4: '第四季度'
+  }
+
+  const maingroup = svg.append("g").attr("id", "maingroup")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  let keys = Object.keys(data[0]).slice(1)
+
+  let tip = d3.tip() // 设置tip
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function (d) {
+      return (
+        '<strong>' +
+        names[d.key] +
+        "<br>营收:</strong> <span style='color:#ffeb3b'>" +
+        d.value +
+        ' 万</span>'
+      )
+    })
+
+  maingroup.call(tip)
+
+
+  let tip1 = d3.tip() // 设置tip
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function (d) {
+      return (
+        "<strong>第一季度:</strong> <span style='color:#ffeb3b'>" +d.q1 +' 万</span><br>'+
+        "<strong>第二季度:</strong> <span style='color:#ffeb3b'>" +d.q2 +' 万</span><br>'+
+        "<strong>第三季度:</strong> <span style='color:#ffeb3b'>" +d.q3 +' 万</span><br>'+
+        "<strong>第四季度:</strong> <span style='color:#ffeb3b'>" +d.q4 +' 万</span>'
+      )
+    })
+
+  maingroup.call(tip1)
+
+  /** 
+   * x轴  - 大组
+   */
+  const xScale = d3
+    .scaleBand()
+    .rangeRound([0, innerWidth])
+    .padding(0.1)
+    .domain(
+      data.map(d => {
+        return d.date
+      })
+    );
+
+  maingroup.append('g')
+    .attr("id", 'xAxis')
+    .attr('transform', `translate(0,${innerHeight})`) //将x坐标轴从上面移到下面
+    .call(d3.axisBottom(xScale));
+
+  /**
+   * y轴
+   */
+  const yScale = d3
+    .scaleLinear()
+    .domain([
+      0,
+      d3.max(data, function (d) {
+        return d3.max(keys, function (key) {
+          return d[key]
+        })
+      })
+    ]).nice() //从下到上
+    .range([innerHeight, 0]);
+
+
+  maingroup.append('g')
+    .attr("id", 'yAxis')
+    .call(d3.axisLeft(yScale))
+    .append("text")
+    .attr("y", -16)
+    .attr('dy', '.71em')
+    .attr("text-anchor", 'middle')
+    .attr("fill", "red")
+    .text("营收(万)");
+
+
+
+
+  /**
+   * x轴 - 每组中小组
+   */
+  const xScale1 = d3.scaleBand()
+    .padding(0.05)
+    .domain(keys)
+    .rangeRound([0, xScale.bandwidth()])
+
+
+  /**
+   * 柱形图
+   */
+  // 柱形颜色
+  const colorScale = d3.scaleOrdinal()
+    .range(['#98abc5', '#7b6888', '#a05d56', '#ff8c00'])
+
+  maingroup.append("g")
+    .attr("class", 'bar--list')
+    .selectAll(".bar-g")
+    .data(data)
+    .join("g")
+    .on("mouseover", tip1.show)
+    .on("mouseout", tip1.hide)
+    .attr("class", 'bar-g')
+    .attr("transform", d => "translate(" + xScale(d.date) + ",0)")
+    .selectAll("rect")
+    .data(d => {
+      return keys.map(key => {
+        return {
+          key: key,
+          value: d[key]
+        }
+      })
+    })
+    .join("rect")
+    // .on("mouseover",tip.show)
+    // .on("mouseout",tip.hide)
+    .attr("x", d => xScale1(d.key))
+    .attr("y", yScale(0))
+    .attr("width", xScale1.bandwidth())
+    .attr("height", 0)
+    .attr("fill", d => colorScale(d.key))
+    .transition()
+    .duration(1000)
+    .attr("y", d => yScale(d.value))
+    .attr("height", d => {
+      return innerHeight - yScale(d.value)
+    })
+
+  /**
+   *  添加标题
+   */
+  maingroup
+    .append("text")
+    .attr("class", 'chartTitle')
+    .attr("fill", '#000')
+    .attr("x", innerWidth / 2 - 30)
+    .attr("y", -12)
+    .attr('font-size', '16px')
+    .attr('font-weight', '700')
+    .attr("text-anchor", 'middle')
+    .text("XX公司近几年各季度产生营收情况汇总");
+
+
+</script>
+
+</html>

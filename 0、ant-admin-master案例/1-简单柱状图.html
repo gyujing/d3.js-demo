@@ -151,8 +151,8 @@
     .attr("x", d => {
       return xScale(d.letter);
     })
-    .attr('y', innerHeight) // 控制动画由下而上
     .attr("width", xScale.bandwidth())
+    .attr('y', yScale(0)) // 控制动画由下而上
     .attr('height', 0) // 控制动画由下而上
     .transition()
     .duration(200)
@@ -161,7 +161,6 @@
       return i * 200
     })
     .attr("y", d => {
-      // console.log(yScale(d.frequency));
       return yScale(d.frequency)
     })
     .attr("height", d => {
@@ -171,6 +170,7 @@
   /**
    * 柱形图上显示数字
    */
+  const barWidth = (innerWidth / data.length) * 0.9 // 用于绘制每条柱
   maingroup
     .append("g")
     .attr("class", "bar-text")
@@ -178,19 +178,20 @@
     .data(data)
     .join("text")
     .attr("fill", 'red') // 颜色
+    .attr("text-anchor", "middle")
     .attr("x", d => {   // 文本坐标x
       return xScale(d.letter)
     })
-    .attr("dx", xScale.bandwidth() / 2 - 30)  //水平偏移
     .attr("y", d => {   // 文本坐标y 
       return yScale(d.frequency)
     })
+    .attr('dx', barWidth / 2)
     .attr("dy", -5)  //垂直偏移
     .text(d => {   //文本内容
       return (d.frequency * 100).toFixed(2) + "%"
     })
-    .on("mouseover",tip.show)
-    .on("mouseout",tip,hide);
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide);
 
 
   /**
