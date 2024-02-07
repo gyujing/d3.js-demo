@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中国地图</title>
+  <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <svg width="800" height="800"></svg>
+
+  <script type="module">
+
+    const svg = d3.select("svg");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { left: 60, top: 60, right: 60, bottom: 60 };
+    const innerWidth = width - margin.right - margin.left;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const maingroup = svg.append("g")
+      .attr("transform", "translate(" + margin.right + "," + margin.top + ")")
+      .style('fill-opacity', 0);
+
+    const res = await fetch('http://cdn.a4z.cn/json/china.geojson')
+    const data = await res.json()
+
+    console.log(data);
+
+    let projection = d3
+      .geoMercator() // 定义墨卡托地理投射(平面投射)
+      .center([107, 31])
+      .scale(d3.min([innerWidth, innerHeight]))
+      .translate([innerWidth / 2, innerHeight / 2])
+
+    let path = d3
+      .geoPath() // 定义路径
+      .projection(projection);
+
+    // console.log(projection);//函数
+    // console.log(path); //函数
+
+    let colorScale = d3.scaleOrdinal(d3.schemeCategory10) // 通用线条的颜色
+
+    let province = maingroup
+      .selectAll('path') // 绘画所有的省
+      .data(data.features)
+      .enter()
+      .append('path')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1)
+      .attr('fill', function (d, i) {
+        return colorScale(i)
+      })
+      .attr('d', path)
+      .on("mouseover", function (d, i) {
+        d3.select(this).attr("fill", "yellow")
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this).attr("fill", colorScale(i))
+      })
+      .append("title")
+      .text(d => {
+        return d.properties.name
+      })
+
+    maingroup.transition()
+      .duration(1000)
+      .style('fill-opacity', 1) // 动画渐现
+
+  </script>
+</body>
+
+</html>
