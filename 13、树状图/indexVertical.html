@@ -89,8 +89,8 @@
         return d.value;
       });
 
-      console.log("data",dataset);
-      console.log("hierarchyData",hierarchyData);
+    console.log("data", dataset);
+    console.log("hierarchyData", hierarchyData);
 
     //创建一个树状图
     var tree = d3.tree()
@@ -101,14 +101,14 @@
 
     //初始化树状图，也就是传入数据,并得到绘制树基本数据
     var treeData = tree(hierarchyData);
-    console.log("treeData",treeData);
+    console.log("treeData", treeData);
     //得到节点
     var nodes = treeData.descendants();  //得到所有的节点
     var links = treeData.links(); //得到所有的边
 
     //输出节点和边
-    console.log("nodes:",nodes);
-    console.log("links:",links);
+    console.log("nodes:", nodes);
+    console.log("links:", links);
 
     //创建一个水平贝塞尔生成曲线生成器
     var Bézier_curve_generator = d3.linkVertical()
@@ -152,7 +152,7 @@
 
     //文字
     gs.append("text")
-      .attr("text-anchor",d=> d.children ? "end" : "start")
+      .attr("text-anchor", d => d.children ? "end" : "start")
       .attr("x", function (d) {
         // return -15;
       })
@@ -162,8 +162,8 @@
       .text(function (d) {
         return d.data.name;
       })
-      .attr("writing-mode",'vertical-rl')//横排从上到下
-      .attr("text-orientation",'upright');
+      .attr("writing-mode", 'vertical-rl')//横排从上到下
+      .attr("text-orientation", 'upright');
   </script>
 </body>
 

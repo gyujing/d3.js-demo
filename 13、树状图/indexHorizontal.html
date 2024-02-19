@@ -98,10 +98,10 @@
 
     //初始化树状图，也就是传入数据,并得到绘制树基本数据
     var treeData = tree(hierarchyData);
-    console.log("treeData",treeData);
+    console.log("treeData",hierarchyData);
     //得到节点
-    var nodes = treeData.descendants();  //得到所有的节点
-    var links = treeData.links(); //得到所有的边
+    var nodes = hierarchyData.descendants();  //得到所有的节点
+    var links = hierarchyData.links(); //得到所有的边
 
     //输出节点和边
     console.log("nodes:",nodes);
@@ -113,7 +113,7 @@
       .y(function (d) { return d.x; });
 
     //有了节点和边集的数据后，我们就可以开始绘制了，
-    //绘制边
+    //绘制 链接
     g.append("g")
       .selectAll("path")
       .data(links)

@@ -128,6 +128,9 @@
 
   chart.select('.axis--y .bg-line:last-of-type').remove()
 
+  /**
+   * 面积图
+   */ 
   const area = d3.area()
     .x(d => xScale(d.day))
     .y0(d => yScale(0))
